@@ -1,0 +1,7 @@
+[package]
+name = "okoma"
+version = "0.1.0"
+authors = ["ashtneoi <ashtneoi@gmail.com>"]
+
+[dependencies]
+rand = "0.4"
