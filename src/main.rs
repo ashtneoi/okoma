@@ -4,24 +4,31 @@ use rand::thread_rng;
 use rand::Rng;
 
 fn main() {
-    let syll_vowel = [
+    let vowel = [
         "a", "e", "i", "o", "u",
         "ai", "aia", "aio", "aiu",
         "ea", "eo", "ia", "io",
         "oa", "oia", "oio",
         "ua", "uia", "uio",
     ];
-    let syll_cons = [
+    let cons = [
         "b", "g", "k", "l", "m", "n", "r", "t", "y",
     ];
 
     let mut rng = thread_rng();
-    let n = 3;
 
-    let mut word = "".to_string();
-    for _ in 0..n {
-        word.push_str(rng.choose(&syll_cons).unwrap());
-        word.push_str(rng.choose(&syll_vowel).unwrap());
+    for _ in 0..10 {
+        println!("{}", gen_word(&vowel, &cons, &mut rng));
     }
-    println!("{}", word);
+}
+
+
+fn gen_word<R>(vowel: &[&str], cons: &[&str], rng: &mut R) -> String
+where R: Rng {
+    let mut word = "".to_string();
+    for _ in 0..(rng.gen_range(2, 4)) {
+        word.push_str(rng.choose(&cons).unwrap());
+        word.push_str(rng.choose(&vowel).unwrap());
+    }
+    word
 }
