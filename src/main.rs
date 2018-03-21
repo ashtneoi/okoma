@@ -1,5 +1,8 @@
 extern crate rand;
 
+use std::env;
+use std::str::FromStr;
+
 use rand::thread_rng;
 use rand::Rng;
 
@@ -17,7 +20,10 @@ fn main() {
 
     let mut rng = thread_rng();
 
-    for _ in 0..10 {
+    let usage_msg = "Usage:  okoma COUNT";
+    let count_str = env::args().nth(1).expect(usage_msg);
+    let count = u64::from_str(&count_str).expect(usage_msg);
+    for _ in 0..count {
         println!("{}", gen_word(&vowel, &cons, &mut rng));
     }
 }
