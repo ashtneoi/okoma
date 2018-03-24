@@ -32,10 +32,12 @@ fn main() {
 fn gen_word<R>(vowel: &[&str], cons: &[&str], rng: &mut R) -> String
 where R: Rng {
     let mut word = "".to_string();
+    let mut low = 2;
     if rng.gen() {
         word.push_str(rng.choose(&vowel).unwrap());
+        low -= 1;
     }
-    for _ in 0..(rng.gen_range(2, 4)) {
+    for _ in 0..(rng.gen_range(low, low + 2)) {
         word.push_str(rng.choose(&cons).unwrap());
         word.push_str(rng.choose(&vowel).unwrap());
     }
