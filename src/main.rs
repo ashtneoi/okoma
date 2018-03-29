@@ -1,10 +1,18 @@
 extern crate rand;
 
 use std::env;
+use std::process::exit;
 use std::str::FromStr;
 
 use rand::thread_rng;
 use rand::Rng;
+
+
+fn exit_with_usage() -> ! {
+    println!("Usage: okoma COUNT");
+    exit(2);
+}
+
 
 fn main() {
     let vowel = [
@@ -20,9 +28,15 @@ fn main() {
 
     let mut rng = thread_rng();
 
-    let usage_msg = "Usage:  okoma COUNT";
-    let count_str = env::args().nth(1).expect(usage_msg);
-    let count = u64::from_str(&count_str).expect(usage_msg);
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        exit_with_usage();
+    }
+
+    let count_str = &args[1];
+    let count = u64::from_str(&count_str).unwrap_or_else(
+        |_| exit_with_usage()
+    );
     for _ in 0..count {
         println!("{}", gen_word(&vowel, &cons, &mut rng));
     }
