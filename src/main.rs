@@ -1,6 +1,5 @@
 extern crate rand;
 
-use std::cmp::PartialOrd;
 use std::env;
 use std::process::exit;
 use std::str::FromStr;
@@ -64,34 +63,33 @@ fn main() {
 }
 
 struct WeightedDist {
-    d: Vec<f64>,
+    d: Vec<u64>,
+    sum: u64,
 }
 
 impl WeightedDist {
     fn new(p: &[u64]) -> WeightedDist {
-        let mut d: Vec<f64> = Vec::new();
-        let sum: f64 = p.iter().sum::<u64>() as f64;
-        let mut cumul_sum: u64 = 0;
-        for x in p {
-            cumul_sum += *x;
-            d.push((cumul_sum as f64) / sum);
+        assert!(p.len() > 0);
+        let mut d = Vec::<u64>::new();
+        let sum = p.iter().sum();
+        {
+            let mut cumul_sum: u64 = 0;
+            for x in p {
+                d.push(cumul_sum);
+                cumul_sum += *x;
+            }
         }
         assert!(p.len() == d.len());
-        WeightedDist { d }
+        assert!(d[0] == 0); // ?
+        WeightedDist { d, sum }
     }
 
     fn gen<R: Rng>(&self, rng: &mut R) -> usize {
-        let n: f64 = rng.gen_range(0.0, 1.0);
-        assert!(!n.is_nan() && !n.is_infinite()); // ?
-        let ii = self.d.binary_search_by(|x| {
-            assert!(!x.is_nan() && !x.is_infinite());
-            PartialOrd::partial_cmp(x, &n).unwrap_or_else(
-                || panic!("what?")
-            )
-        });
+        let n: u64 = rng.gen_range(0, self.sum); // TODO: this is slow
+        let ii = self.d.binary_search(&n);
         match ii {
             Ok(i) => i,
-            Err(i) => i,
+            Err(i) => i - 1, // self.d[0] is always 0 so this is fine
         }
     }
 }
