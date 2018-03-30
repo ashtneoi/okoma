@@ -79,8 +79,6 @@ impl WeightedDist {
                 cumul_sum += *x;
             }
         }
-        assert!(p.len() == d.len());
-        assert!(d[0] == 0); // ?
         WeightedDist { d, sum }
     }
 
