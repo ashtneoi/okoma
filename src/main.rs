@@ -118,6 +118,7 @@ impl<'a, 'b> WordGen<'a, 'b> {
         let mut low = 2;
         if rng.gen() {
             low -= 1;
+            word.push_str(self.v[self.vd.gen(rng)]);
         }
         for _ in 0..(rng.gen_range(low, low + 2)) {
             word.push_str(self.c[self.cd.gen(rng)]);
