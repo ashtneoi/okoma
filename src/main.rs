@@ -62,6 +62,8 @@ fn main() {
     }
 }
 
+// Turns out this is basically rand::distributions::WeightedChoice.
+// TODO: Use that instead.
 struct WeightedDist {
     d: Vec<u64>,
     sum: u64,
