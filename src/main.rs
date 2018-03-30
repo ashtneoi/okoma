@@ -8,12 +8,10 @@ use std::str::FromStr;
 use rand::thread_rng;
 use rand::Rng;
 
-
 fn exit_with_usage() -> ! {
     println!("Usage: okoma COUNT");
     exit(2);
 }
-
 
 fn main() {
     let vv: &[(&str, u64)] = &[
@@ -65,7 +63,6 @@ fn main() {
     }
 }
 
-
 struct WeightedDist {
     d: Vec<f64>,
 }
@@ -99,14 +96,12 @@ impl WeightedDist {
     }
 }
 
-
 struct WordGen<'a, 'b> {
     vd: WeightedDist,
     v: Vec<&'a str>,
     cd: WeightedDist,
     c: Vec<&'b str>,
 }
-
 
 impl<'a, 'b> WordGen<'a, 'b> {
     fn new(vv: &[(&'a str, u64)], cc: &[(&'b str, u64)]) -> WordGen<'a, 'b> {
