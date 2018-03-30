@@ -66,12 +66,12 @@ fn main() {
 }
 
 
-struct PmfDist {
+struct WeightedDist {
     d: Vec<f64>,
 }
 
-impl PmfDist {
-    fn new(p: &[u64]) -> PmfDist {
+impl WeightedDist {
+    fn new(p: &[u64]) -> WeightedDist {
         let mut d: Vec<f64> = Vec::new();
         let sum: f64 = p.iter().sum::<u64>() as f64;
         let mut cumul_sum: u64 = 0;
@@ -80,7 +80,7 @@ impl PmfDist {
             d.push((cumul_sum as f64) / sum);
         }
         assert!(p.len() == d.len());
-        PmfDist { d }
+        WeightedDist { d }
     }
 
     fn gen<R: Rng>(&self, rng: &mut R) -> usize {
@@ -101,9 +101,9 @@ impl PmfDist {
 
 
 struct WordGen<'a, 'b> {
-    vd: PmfDist,
+    vd: WeightedDist,
     v: Vec<&'a str>,
-    cd: PmfDist,
+    cd: WeightedDist,
     c: Vec<&'b str>,
 }
 
@@ -113,9 +113,9 @@ impl<'a, 'b> WordGen<'a, 'b> {
         let v: (Vec<_>, Vec<_>) = vv.iter().cloned().unzip();
         let c: (Vec<_>, Vec<_>) = cc.iter().cloned().unzip();
         WordGen {
-            vd: PmfDist::new(&v.1),
+            vd: WeightedDist::new(&v.1),
             v: v.0,
-            cd: PmfDist::new(&c.1),
+            cd: WeightedDist::new(&c.1),
             c: c.0,
         }
     }
