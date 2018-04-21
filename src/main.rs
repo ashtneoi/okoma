@@ -13,7 +13,7 @@ fn exit_with_usage() -> ! {
 }
 
 fn main() {
-    let vv: &[(&str, u64)] = &[
+    let vv: &[(&str, u32)] = &[
         ("a", 10),
         ("e", 5),
         ("i", 8),
@@ -34,7 +34,7 @@ fn main() {
         ("uia", 1),
         ("uio", 1),
     ];
-    let cc: &[(&str, u64)] = &[
+    let cc: &[(&str, u32)] = &[
         ("b", 2),
         ("g", 1),
         ("k", 8),
@@ -53,7 +53,7 @@ fn main() {
     }
 
     let count_str = &args[1];
-    let count = u64::from_str(&count_str).unwrap_or_else(
+    let count = u32::from_str(&count_str).unwrap_or_else(
         |_| exit_with_usage()
     );
     let wg = WordGen::new(vv, cc);
@@ -65,17 +65,17 @@ fn main() {
 // Turns out this is basically rand::distributions::WeightedChoice.
 // TODO: Use that instead.
 struct WeightedDist {
-    d: Vec<u64>,
-    sum: u64,
+    d: Vec<u32>,
+    sum: u32,
 }
 
 impl WeightedDist {
-    fn new(p: &[u64]) -> WeightedDist {
+    fn new(p: &[u32]) -> WeightedDist {
         assert!(p.len() > 0);
-        let mut d = Vec::<u64>::new();
+        let mut d = Vec::<u32>::new();
         let sum = p.iter().sum();
         {
-            let mut cumul_sum: u64 = 0;
+            let mut cumul_sum: u32 = 0;
             for x in p {
                 d.push(cumul_sum);
                 cumul_sum += *x;
@@ -85,7 +85,7 @@ impl WeightedDist {
     }
 
     fn gen<R: Rng>(&self, rng: &mut R) -> usize {
-        let n: u64 = rng.gen_range(0, self.sum); // TODO: this is slow
+        let n: u32 = rng.gen_range(0, self.sum); // TODO: this is slow
         let ii = self.d.binary_search(&n);
         match ii {
             Ok(i) => i,
@@ -102,7 +102,7 @@ struct WordGen<'a, 'b> {
 }
 
 impl<'a, 'b> WordGen<'a, 'b> {
-    fn new(vv: &[(&'a str, u64)], cc: &[(&'b str, u64)]) -> WordGen<'a, 'b> {
+    fn new(vv: &[(&'a str, u32)], cc: &[(&'b str, u32)]) -> WordGen<'a, 'b> {
         let v: (Vec<_>, Vec<_>) = vv.iter().cloned().unzip();
         let c: (Vec<_>, Vec<_>) = cc.iter().cloned().unzip();
         WordGen {
