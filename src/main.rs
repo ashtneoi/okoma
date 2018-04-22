@@ -61,12 +61,8 @@ fn main() {
         |_| exit_with_usage()
     );
 
-    let mut v: Vec<_> = vv.iter().map(
-        |&(s, w)| Weighted { weight: w, item: s }
-    ).collect();
-    let mut c: Vec<_> = cc.iter().map(
-        |&(s, w)| Weighted { weight: w, item: s }
-    ).collect();
+    let mut v: Vec<_> = WordGen::build_weighted_vec(&mut vv.iter());
+    let mut c: Vec<_> = WordGen::build_weighted_vec(&mut cc.iter());
 
     let wg = WordGen::new(&mut v, &mut c);
     for _ in 0..count {
@@ -80,6 +76,15 @@ struct WordGen<'a, 'b> {
 }
 
 impl<'a, 'b> WordGen<'a, 'b> {
+    fn build_weighted_vec<'c, 'd, I>(x: &'c mut I) -> Vec<Weighted<&'d str>>
+    where
+        I: Iterator<Item = &'d (&'d str, u32)>,
+    {
+        x.map(
+            |&(s, w)| Weighted { weight: w, item: s }
+        ).collect()
+    }
+
     fn new(v: &'a mut [Weighted<&'a str>], c: &'b mut [Weighted<&'b str>])
         -> WordGen<'a, 'b>
     {
