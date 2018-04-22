@@ -1,11 +1,15 @@
 extern crate rand;
 
+use rand::distributions::{
+    IndependentSample,
+    Weighted,
+    WeightedChoice,
+};
+use rand::thread_rng;
+use rand::Rng;
 use std::env;
 use std::process::exit;
 use std::str::FromStr;
-
-use rand::thread_rng;
-use rand::Rng;
 
 fn exit_with_usage() -> ! {
     println!("Usage: okoma COUNT");
@@ -56,60 +60,32 @@ fn main() {
     let count = u32::from_str(&count_str).unwrap_or_else(
         |_| exit_with_usage()
     );
-    let wg = WordGen::new(vv, cc);
+
+    let mut v: Vec<_> = vv.iter().map(
+        |&(s, w)| Weighted { weight: w, item: s }
+    ).collect();
+    let mut c: Vec<_> = cc.iter().map(
+        |&(s, w)| Weighted { weight: w, item: s }
+    ).collect();
+
+    let wg = WordGen::new(&mut v, &mut c);
     for _ in 0..count {
         println!("{}", wg.gen(&mut rng));
     }
 }
 
-// Turns out this is basically rand::distributions::WeightedChoice.
-// TODO: Use that instead.
-struct WeightedDist {
-    d: Vec<u32>,
-    sum: u32,
-}
-
-impl WeightedDist {
-    fn new(p: &[u32]) -> WeightedDist {
-        assert!(p.len() > 0);
-        let mut d = Vec::<u32>::new();
-        let sum = p.iter().sum();
-        {
-            let mut cumul_sum: u32 = 0;
-            for x in p {
-                d.push(cumul_sum);
-                cumul_sum += *x;
-            }
-        }
-        WeightedDist { d, sum }
-    }
-
-    fn gen<R: Rng>(&self, rng: &mut R) -> usize {
-        let n: u32 = rng.gen_range(0, self.sum); // TODO: this is slow
-        let ii = self.d.binary_search(&n);
-        match ii {
-            Ok(i) => i,
-            Err(i) => i - 1, // self.d[0] is always 0 so this is fine
-        }
-    }
-}
-
 struct WordGen<'a, 'b> {
-    vd: WeightedDist,
-    v: Vec<&'a str>,
-    cd: WeightedDist,
-    c: Vec<&'b str>,
+    vdist: WeightedChoice<'a, &'a str>,
+    cdist: WeightedChoice<'b, &'b str>,
 }
 
 impl<'a, 'b> WordGen<'a, 'b> {
-    fn new(vv: &[(&'a str, u32)], cc: &[(&'b str, u32)]) -> WordGen<'a, 'b> {
-        let v: (Vec<_>, Vec<_>) = vv.iter().cloned().unzip();
-        let c: (Vec<_>, Vec<_>) = cc.iter().cloned().unzip();
+    fn new(v: &'a mut [Weighted<&'a str>], c: &'b mut [Weighted<&'b str>])
+        -> WordGen<'a, 'b>
+    {
         WordGen {
-            vd: WeightedDist::new(&v.1),
-            v: v.0,
-            cd: WeightedDist::new(&c.1),
-            c: c.0,
+            vdist: WeightedChoice::new(v),
+            cdist: WeightedChoice::new(c),
         }
     }
 
@@ -118,11 +94,11 @@ impl<'a, 'b> WordGen<'a, 'b> {
         let mut low = 2;
         if rng.gen() {
             low -= 1;
-            word.push_str(self.v[self.vd.gen(rng)]);
+            word.push_str(self.vdist.ind_sample(rng));
         }
         for _ in 0..(rng.gen_range(low, low + 2)) {
-            word.push_str(self.c[self.cd.gen(rng)]);
-            word.push_str(self.v[self.vd.gen(rng)]);
+            word.push_str(self.cdist.ind_sample(rng));
+            word.push_str(self.vdist.ind_sample(rng));
         }
         word
     }
